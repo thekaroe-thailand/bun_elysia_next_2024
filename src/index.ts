@@ -4,7 +4,8 @@ import { staticPlugin } from "@elysiajs/static";
 import { swagger } from "@elysiajs/swagger";
 import { jwt } from "@elysiajs/jwt";
 
-import CustomerController from "./controllers/CustomerController";
+import CustomerController from "./controllers/CustomerController"; // ไม่ค่อยนิยมใช้กัน
+import { UserController } from "./controllers/UserController"; // คนนิยมใช้กัน
 
 const app = new Elysia()
   .use(cors())
@@ -15,10 +16,17 @@ const app = new Elysia()
     secret: "secret",
   }))
 
-  .get("/customers", CustomerController.list)
-  .post("/customers", CustomerController.create)
-  .put("/customers/:id", CustomerController.update)
-  .delete("/customers/:id", CustomerController.remove)
+  .group('/users', (app) => app
+    .get('/', UserController.list)
+    .post('/', UserController.create)
+  )
+
+  .group('/customers', (app) => app
+    .get("/", CustomerController.list)
+    .post("/", CustomerController.create)
+    .put("/:id", CustomerController.update)
+    .delete("/:id", CustomerController.remove)
+  )
 
   .post("/login", async ({ jwt, cookie: { auth } }) => {
     const user = {
@@ -45,6 +53,24 @@ const app = new Elysia()
   })
   .get("/logout", ({ cookie: { auth } }) => {
     return { message: "Logout successful" };
+  })
+  .get('/info', async ({ jwt, request }) => {
+    if (request.headers.get('Authorization') === null) {
+      return { message: "No Authorization header" };
+    }
+
+    const token = request.headers.get('Authorization') ?? '';
+
+    if (token === '') {
+      return { message: "No token" };
+    }
+
+    const payload = await jwt.verify(token);
+
+    return {
+      message: 'Hello Elysia',
+      payload: payload,
+    }
   })
   .get("/", () => "Hello Elysia")
   .get("/hello", () => "Hello World")
