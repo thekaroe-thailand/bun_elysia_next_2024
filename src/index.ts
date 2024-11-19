@@ -10,23 +10,42 @@ import { UserController } from "./controllers/UserController"; // คนนิ�
 const app = new Elysia()
   .use(cors())
   .use(staticPlugin())
-  .use(swagger())
+  .use(swagger({
+    documentation: {
+      tags: [
+        { name: 'User', description: 'User related endpoints' },
+        { name: 'Customer', description: 'Customer related endpoints' }
+      ]
+    }
+  }))
   .use(jwt({
     name: "jwt",
     secret: "secret",
   }))
 
   .group('/users', (app) => app
-    .get('/', UserController.list)
-    .post('/', UserController.create)
+    .get('/', UserController.list, { tags: ['User'] })
+    .post('/', UserController.create, { tags: ['User'] })
+    .put('/:id', UserController.update, { tags: ['User'] })
+    .delete('/:id', UserController.remove, { tags: ['User'] })
+    .get('/some-field', UserController.findSomeField, { tags: ['User'] })
+    .get('/sort', UserController.sort, { tags: ['User'] })
+    .get('/filter', UserController.filter, { tags: ['User'] })
+    .get('/more-than', UserController.moreThan, { tags: ['User'] })
+    .get('/less-than', UserController.lessThan, { tags: ['User'] })
+    .get('/not-equal', UserController.notEqual, { tags: ['User'] })
+    .get('/in', UserController.in, { tags: ['User'] })
+    .get('/is-null', UserController.isNull, { tags: ['User'] })
+    .get('/is-not-null', UserController.isNotNull, { tags: ['User'] })
+    .get('/between', UserController.between, { tags: ['User'] })
   )
 
   .group('/customers', (app) => app
-    .get("/", CustomerController.list)
-    .post("/", CustomerController.create)
-    .put("/:id", CustomerController.update)
-    .delete("/:id", CustomerController.remove)
-  )
+    .get("/", CustomerController.list, { tags: ['Customer'] })
+    .post("/", CustomerController.create, { tags: ['Customer'] })
+    .put("/:id", CustomerController.update, { tags: ['Customer'] })
+    .delete("/:id", CustomerController.remove, { tags: ['Customer'] })
+  ) // bun prisma db pull
 
   .post("/login", async ({ jwt, cookie: { auth } }) => {
     const user = {
