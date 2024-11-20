@@ -149,6 +149,97 @@ export const UserController = {
                 }
             }
         });
+    },
+    count: async () => {
+        try {
+            const totalRows = await prisma.user.count();
+
+            return { totalRows };
+        } catch (error) {
+            return error;
+        }
+    },
+    sum: async () => {
+        try {
+            const result = await prisma.user.aggregate({
+                _sum: {
+                    credit: true
+                }
+            });
+
+            return { sum: result._sum.credit };
+        } catch (error) {
+            return error;
+        }
+    },
+    max: async () => {
+        try {
+            const result = await prisma.user.aggregate({
+                _max: {
+                    credit: true
+                }
+            });
+
+            return { max: result._max.credit };
+        } catch (error) {
+            return error;
+        }
+    },
+    min: async () => {
+        return await prisma.user.aggregate({
+            _min: {
+                credit: true
+            }
+        });
+    },
+    avg: async () => {
+        return await prisma.user.aggregate({
+            _avg: {
+                credit: true
+            }
+        });
+    },
+    usersAndDepartment: async () => {
+        try {
+            const users = await prisma.user.findMany({
+                include: {
+                    department: true
+                }
+            });
+
+            return users;
+        } catch (err) {
+            return err;
+        }
+    },
+    signIn: async ({ body }: {
+        body: {
+            email: string,
+            password: string
+        }
+    }) => {
+        try {
+            const user = await prisma.user.findFirst({
+                where: {
+                    email: body.email,
+                    password: body.password
+                }
+            })
+
+            return { user: user };
+        } catch (err) {
+            return err;
+        }
     }
 }
+
+
+
+
+
+
+
+
+
+
 

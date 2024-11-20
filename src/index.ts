@@ -6,6 +6,7 @@ import { jwt } from "@elysiajs/jwt";
 
 import CustomerController from "./controllers/CustomerController"; // ไม่ค่อยนิยมใช้กัน
 import { UserController } from "./controllers/UserController"; // คนนิยมใช้กัน
+import { DepartmentController } from "./controllers/DepartmentController";
 
 const app = new Elysia()
   .use(cors())
@@ -14,7 +15,8 @@ const app = new Elysia()
     documentation: {
       tags: [
         { name: 'User', description: 'User related endpoints' },
-        { name: 'Customer', description: 'Customer related endpoints' }
+        { name: 'Customer', description: 'Customer related endpoints' },
+        { name: 'Department', description: 'Department related endpoints' }
       ]
     }
   }))
@@ -22,6 +24,13 @@ const app = new Elysia()
     name: "jwt",
     secret: "secret",
   }))
+
+  .group('/departments', { tags: ['Department'] }, (app) => app
+    .get('/', DepartmentController.list)
+    .get('/usersInDepartment/:id', DepartmentController.usersInDepartment)
+    .post('/create-department-and-users', DepartmentController.createDepartmentAndUsers)
+    .get('/count-users-in-department', DepartmentController.countUsersInDepartment)
+  )
 
   .group('/users', (app) => app
     .get('/', UserController.list, { tags: ['User'] })
@@ -38,6 +47,13 @@ const app = new Elysia()
     .get('/is-null', UserController.isNull, { tags: ['User'] })
     .get('/is-not-null', UserController.isNotNull, { tags: ['User'] })
     .get('/between', UserController.between, { tags: ['User'] })
+    .get('/count', UserController.count, { tags: ['User'] })
+    .get('/sum', UserController.sum, { tags: ['User'] })
+    .get('/max', UserController.max, { tags: ['User'] })
+    .get('/min', UserController.min, { tags: ['User'] })
+    .get('/avg', UserController.avg, { tags: ['User'] })
+    .get('/users-and-department', UserController.usersAndDepartment, { tags: ['User'] })
+    .post('/sign-in', UserController.signIn, { tags: ['User'] })
   )
 
   .group('/customers', (app) => app
